@@ -69,6 +69,6 @@ Many swear words in the list were phrases of two or more words, for instance `cu
 - to obtain full list (singulars and plurals) -> `merge.bqn`
 - to create plurals list -> regex described above and author manual creation of `plurals.txt`
 - to separate plurals list -> `split.bqn`
-- to turn phrases of singulars into camel case et al. -> `camelify.bqn`
+- to turn phrases of singulars into camel case et al. -> `camel.bqn`
 
 the full pipeline may be found at `pipeline.sh`
