@@ -1,9 +1,6 @@
 #!/usr/bin/env bqn
 # utils
-# downcase
-DC ← (32⊸×)∘('A'⊸≤∧'Z'⊸≥)⊸+
-# returns function that replaces all 𝕗's with 𝕘's
-_r_ ← {(⊢+(𝕘-𝕗)×𝕗⊸=)}
+ws‿r‿dc‿sd ← •Import "utils.bqn"
 
 # normalize spaces
 NS ← { 𝕊w: # takes a single word
@@ -15,12 +12,13 @@ NS ← { 𝕊w: # takes a single word
 
 # normalize word list
 NWL ← { 𝕊wl: # takes a word list
-    wl {¬∨´"- 0123456789"∊𝕩}¨⊸/↩ # remove all words containing numbers, spaces, or hyphens
-    #wl '-'_r_' '¨↩               # replace all dashes with spaces
+    wl {¬∨´"0123456789"∊𝕩}¨⊸/↩ # remove all words containing numbers, spaces, or hyphens
+    wl '-'_r_' '¨↩               # replace all dashes with spaces
     wl DC¨↩                      # downcase everything
-    #wl NS¨↩                      # normalize spaces
-    wl ¬∘(0∾˜⊢)∘(¯1⊸↓≡¨1⊸↓)⊸/∘∧↩ # sort and dedup
+    wl NS¨↩                      # normalize spaces
+    wl SD↩                       # sort and dedup
     wl
 }
 
-•Out¨ NWL ∾○•Flines´ "wikipedia-list.txt"‿"en.txt"
+# print NWL if any arg was provided, otherwise do nothing
+{ 0≠≠•args ? •Out¨ NWL ∾´ •Flines¨ •args ; 0 }
