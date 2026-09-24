@@ -1,5 +1,5 @@
 #!/usr/bin/env bqn
-ws‿r‿uc‿dc‿sb‿jw‿sdci ← •Import "utils.bqn"
+ws‿r‿uc‿dc‿sb‿jw‿sd‿sci ← •Import "utils.bqn"
 
 # process single word (not phrase)
 Word  ← {⍷𝕩⊸{𝕏𝕨}¨ ⊢‿UC‿DC‿(UC⌾⊏ DC)}
@@ -11,4 +11,4 @@ Words ← { 𝕊p:   # takes a phrase (as character vector) as input
     ⥊ w JW⌜ ""‿"_"‿" "
 }
 
-•Out¨ SDCI ∾´ {∨´𝕩∊ws ? Words 𝕩 ; Word 𝕩 }¨ •Flines ⊑ •args
+•Out¨ SCI SD ∾´ {∨´𝕩∊ws ? Words 𝕩 ; Word 𝕩 }¨ •FLines ⊑ •args
