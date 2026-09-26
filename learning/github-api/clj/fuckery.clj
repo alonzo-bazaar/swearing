@@ -109,5 +109,5 @@
       ["word,count"
        "fuck,you"])))
 
-(def word-list (read-lines  str/trim))
-(write-lines 
+(def word-list (read-lines word-list-file str/trim))
+(doall (map println (words-freqs-csv-lines word-list)))
