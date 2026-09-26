@@ -57,53 +57,57 @@
   (loop [counts []
          words words
          try-number 1]
-    (if (empty? words) {:status 'ok :data counts}
-        (let* [head (first words)
-               tail (rest  words)
-               r (try-find-occurences head)]
-          (if log-current-word
-            (println (str "fetching occurence count for [" head "]...")))
-          (cond 
-            ;; :error is a field added by http-kit if some shit gets fucked in
-            ;; the request itself, (if (:error r)) then we're like
-            ;; fuck it, hcf, eat shit and die, morte di cacca addosso
-            (:error r)
-            {:status 'fuck
+    (if (empty? words)
+      {:status 'ok :data counts}
+      (let* [head (first words)
+             tail (rest  words)
+             r (try-find-occurences head)]
+        (if log-current-word
+          (println (str "fetched occurence count for [" head "]...")))
+        (cond 
+          ;; :error is a field added by http-kit if some shit gets fucked in
+          ;; the request itself, (if (:error r)) then we're like
+          ;; fuck it, hcf, eat shit and die, morte di cacca addosso
+          (:error r)
+          {:status 'fuck
+           :data r
+           :loop-state [counts words try-number]}
+
+          ;; status != 200 assumed to mean we have been timed out
+          ;; timeout handled by waiting then retrying
+          ;; if max number of tries has been already reached then
+          ;; we shit ourselves and die
+          (not (= (:status r) 200))
+          (if (>= try-number max-tries)
+            {:status 'too-many-retries
              :data r
-             :loop-state [counts words try-number]}
+             :loop-state [counts words try-number]
+             }
+            (do (Thread/sleep sleep-after-timeout)
+                (recur counts words (+ 1 try-number))))
 
-            ;; status != 200 assumed to mean we have been timed out
-            ;; timeout handled by waiting then retrying
-            ;; if max number of tries has been already reached then
-            ;; we shit ourselves and die
-            (not (= (:status r) 200))
-            (if (>= try-number max-tries)
-              {:status 'too-many-retries
+          ;; we got a 200, yippie! :D
+          :else
+          (let [count (get (json/read-str (:body r)) "total_count")]
+            (if-not count
+              {:status 'fuck
                :data r
-               :loop-state [counts words try-number]
+               :loop-state [counts words]
                }
-              (do (Thread/sleep sleep-after-timeout)
-                  (recur counts words (+ 1 try-number))))
-
-            ;; we got a 200, yippie! :D
-            :else
-            (let [count (get (json/read-str (:body r)) "total_count")]
-              (if-not count
-                {:status 'fuck
-                 :data r
-                 :loop-state [counts words]
-                 }
-                (let [next-counts (conj counts count)
-                      next-words  tail]
-                  (do (Thread/sleep sleep-after-success)
-                      (recur next-counts next-words 1))))))))))
+              (let [next-counts (conj counts count)
+                    next-words  tail]
+                (do (Thread/sleep sleep-after-success)
+                    (recur next-counts next-words 1))))))))))
 
 (defn words-freqs-csv-lines [words]
-  (let [counts (get-word-list-counts words)]
-    (-> []
-        (into ["word,count"])
-        (into (mapv #(str %1 "," %2) words counts)))))
-
+  (let [try-counts (get-word-list-counts words :sleep-after-success 1000 :log-current-word true)]
+    (if (= 'ok (:status try-counts))
+      (let [counts (:data try-counts)]
+        (-> []
+            (into ["word,count"])
+            (into (mapv #(str %1 "," %2) words counts))))
+      ["word,count"
+       "fuck,you"])))
 
 (def word-list (read-lines  str/trim))
 (write-lines 
