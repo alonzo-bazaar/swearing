@@ -15,6 +15,9 @@ count_occurences() {
         | jq '.total_count'
 }
 
+count_occurences "kitemmuort"
+exit
+
 echo "word,count" > "${OUTPUT_COUNT_FILE}"
 while read -r line; do
     occurences='null'
