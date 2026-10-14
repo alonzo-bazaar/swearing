@@ -1,0 +1,32 @@
+* blacklist?
+~ass~ e ~cum~ (il lettore è pregato di leggere almeno un poco del resto del paragrafo prima di mettersi a ridere) 
+
+~ass~ e ~cum~ sono na sorgente immane di falsi positivi,
+pure a limitarci con le regex che c'erano nel paper, quindi (qua riportate solo per ~cum~ ma t'ha capi)
+
+(camelCase)
+- start :: ~\bcum[A-Z][a-z]*\b~
+- mid   :: ~\b[a-z][A-Za-z]*Cum[A-Z][a-z]*\b~
+- end   :: ~\b[a-z][A-Za-z]*Cum\b~
+(PascalCase)
+- start :: ~\bCum[A-Z][a-z]*\b~
+- mid   :: ~\b[A-Z][a-z]*Cum[A-Z][a-z]*\b~
+- end   :: ~\b[A-Z][A-Za-z]*Cum\b~
+(lower_snake_case)
+- start :: ~\bcum_[a-z_]*\b~
+- mid   :: ~\b[a-z_]*_cum_[a-z_]*\b~
+- end   :: ~\b[a-z_]*_cum\b~
+(Upper_Snake_Case)
+[t'ha capito]
+(CAPSLOCK_SNAKE_CASE)
+[t'ha capito]
+
+lo matchi comunque con codice normalissimo
+- ~ass~ prende mezze funzioni di assert mai esistite
+- ~cum~ prende
+  - na marea assurda di codice numerico (somme cumulative, prodotti cumulativo...)
+  - se te viene male ti prende anche un lorem ipsum
+
+quindi proporrei
+- o levarle proprio
+- o, un po' meglio ma possibilmente più dispendioso, fare dei test a parte dove leviamo ~ass~ e ~cum~ e vedere se cambia qualcosa
