@@ -14,7 +14,7 @@ spew_shit() {
         -H "X-GitHub-Api-Version: 2026-03-10"
 }
 
-spew_shit "cum"
+spew_shit "fuck" | jq > fuck.json
 exit
 
 echo "word,count" > "${OUTPUT_COUNT_FILE}"
