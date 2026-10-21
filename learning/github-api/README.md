@@ -1,3 +1,7 @@
+> this file is called `README.md` just so it shows up the moment you open this directory up
+> it's more of a report/readme hybrid for the time being
+> pardon the confusion
+
 # github api
 we're gonna use github's search api to look for repositories containing all the various thingamajingies (profanities)
 
@@ -9,12 +13,22 @@ we're gonna use github's search api to look for repositories containing all the 
 
 # api limitations considerations
 - the github api does not allow for wildcards in searching repos, and regexen are not even remotely mentioned
-  - ([source](https://docs.github.com/en/rest/search/search?utm_source=chatgpt.com&apiVersion=2026-03-10#limitations-on-query-length))  
+  - ([source](https://docs.github.com/en/rest/search/search?apiVersion=2026-03-10#limitations-on-query-length))  
     plus the [query syntax page](https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax) does not mention wildcards  
     so... yeah I'm quite sure the code search does not support wildcards (it's probably some whatever n-grans indexing bullshit underneath so supporting regex sounds differently feasible for github's scale, only plain substring mathcing seems to be allowed)
   - as an ([additional source (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code#considerations-for-code-search)) the legacy documentation for the api explicitly states the github rest api does *not* support wildcards (let alone regex)
 
-Given that the github api does not allow for wildcards&Co. it seems we're gonna have to find someway else to match swear words
+ok nevermind [appearently it's supported](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax?apiVersion=2026-03-10#using-regular-expressions)
+it's just that the *code search* api and the *search* api are two wildly different things
+that's not confusing at all
+fuck you github
+
+ok nevermind the nevermind, the github code search is not part of their rest api, it's just part of their web interface (you visit the page for a repo in your browser and there's a search bar there that support the code search API
+the github code search docs are [here](https://docs.github.com/en/search-github/github-code-search)
+and if you see the part about [using the code search](https://docs.github.com/en/search-github/github-code-search/using-github-code-search) then surprise surprise, no api
+just search bar
+
+so... given that the github api does not allow for wildcards&Co. it seems we're gonna have to find someway else to match swear words
 most of the available literature uses offline tools for finer control over swear words (and general toxicity) detection,
 We want to checkout as little as possible for the initial phases of this study so if we wanna do this initial search on a github api level we'll have to do this initial search within the limits of the github api
 
