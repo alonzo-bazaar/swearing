@@ -8,7 +8,7 @@
 # parameters for query to send to github
 GITHUB_API_VERSION='2026-03-10 '
 GITHUB_TOKEN="$(cat "${HOME}/.methlab/github-tokens/alonzo")"
-PER_PAGE='100'
+PER_PAGE='1'
 LANGUAGES=( 'c++' )
 # language query string, initialized empty
 # will be populated once we have the function to create it
@@ -25,6 +25,24 @@ fatal() {
     echo "[FATAL ERROR] $*" >&2
     exit 1
 }
+
+uq () {
+    echo "%22$1%22"
+}
+
+#WS='"fuck " " fuck"'
+#WS='"fuck "'
+#WS='" fuck"'
+WS='"fuck " OR " fuck"'
+WS=${WS// /%20}
+WS=${WS//\"/%22}
+
+curl --no-progress-meter\
+    -L "https://api.github.com/search/code?q=${WS}+in:file+language:${ uq c ; }+language:${ uq go ; }&per_page=1"\
+    -H "Accept: application/vnd.github.text-match+json"\
+    -H "Authorization: Bearer ${GITHUB_TOKEN}"\
+    -H "X-GitHub-Api-Version: ${GITHUB_API_VERSION}" | jq '.total_count'
+exit
 
 # do url percent encoding on $1
 # not the safest approach out there but hey, bash be bash

@@ -18,56 +18,48 @@ we're gonna use github's search api to look for repositories containing all the 
     so... yeah I'm quite sure the code search does not support wildcards (it's probably some whatever n-grans indexing bullshit underneath so supporting regex sounds differently feasible for github's scale, only plain substring mathcing seems to be allowed)
   - as an ([additional source (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code#considerations-for-code-search)) the legacy documentation for the api explicitly states the github rest api does *not* support wildcards (let alone regex)
 
-ok nevermind [appearently it's supported](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax?apiVersion=2026-03-10#using-regular-expressions)
-it's just that the *code search* api and the *search* api are two wildly different things
-that's not confusing at all
-fuck you github
+The code search (docs [here](https://docs.github.com/en/search-github/github-code-search)) [does support regex and wildcards](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax?apiVersion=2026-03-10#using-regular-expressions)  
+but the github code search is part of their webui and not available as part of their rest api, it doesn't provide us with the tools to programmatically search all of github for words of interest, this is particularly evident looking at the page for [using the code search](https://docs.github.com/en/search-github/github-code-search/using-github-code-search) (it's all searchbars and no curl)
 
-ok nevermind the nevermind, the github code search is not part of their rest api, it's just part of their web interface (you visit the page for a repo in your browser and there's a search bar there that support the code search API
-the github code search docs are [here](https://docs.github.com/en/search-github/github-code-search)
-and if you see the part about [using the code search](https://docs.github.com/en/search-github/github-code-search/using-github-code-search) then surprise surprise, no api
-just search bar
+we have furthermore found that
+- the 2022 version of the rest api does not have boolean operators: [source](https://github.com/orgs/community/discussions/125409)
+- the 2022 version of the rest api does not have regex support:     [source](https://github.com/orgs/community/discussions/112338)
+it is unclear wether the 2026 vrsion of the rest api does support boolean operators,
+but from the author trying to use said boolean operators it appears that the api does *not* support explicit `AND` and `OR` operators
+although juxtapposition does work as an implicit "and" there is no trace of an implicit or explicit "or", which is what the author was looking for
 
-so... given that the github api does not allow for wildcards&Co. it seems we're gonna have to find someway else to match swear words
-most of the available literature uses offline tools for finer control over swear words (and general toxicity) detection,
-We want to checkout as little as possible for the initial phases of this study so if we wanna do this initial search on a github api level we'll have to do this initial search within the limits of the github api
+The page for [the search api (2026 version)](https://docs.github.com/en/rest/search/search?apiVersion=2026-03-10) does mention `AND`, `OR`, and `NOT` operators, but it does not by itself go further on those operators, instead redirecting the user to the page for the search syntax.
+The page for [the search syntax](https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax) only talks about the `NOT` operator and does not mention neither `AND` nor `OR`.
 
-## plan of attack
-The Github api has two features we're gonna use for this filtering
-- you can put and/or clauses in text queries
-- you can get the text that matched your query as part of the query result
+to illustrate the lack of `AND` and `OR` operators the reader may inspect the `try_operators.bash` script, after providing the appropriate `GITHUB_TOKEN` variable to the aphorementioned script, the output should look like (at the time of writing)
+```
+count of ["fuck"]: 107776
+count of ["shit"]: 396288
+count of ["fuck" "shit"]: 12768
+count of ["fuck" AND "shit"]: 12288
+count of ["fuck" "and" "shit"]: 12288
+```
+so... yeah the `AND` in there is taken as a searched key and not as an operator
 
-so here's the plan
-we wanna look for a swear word, say fuck
-instead of matching for the following regexen (as the paper did)
-- `/[A-Z\b_]fuck[A-Z\b_]/`
-- `/[A-Z\b_]Fuck[A-Z\b_]/`
-- `/[A-Z\b_]FUCK[A-Z\b_]/`
-- ...
-which would take entirely too many queries to emulate, we can instead match for the following substrings
-(lowercase)
-- ` fuck`
+The lack of a supported `OR` operator means we can't look for more words in one api call and will have to make separate calls for every word we're looking for, this is particularly unfortunate for our use case. To illustrate the reason as to why let us consider looking or different forms in which the word `fuck` may be present in a source code file, say we're interested in:
+- `fuck`
 - `fuck `
+- ` fuck`
+- ` fuck `
 - `fuck_`
 - `_fuck`
-(capitalized)
-- ` Fuck`
-- `Fuck `
-- `Fuck_`
-- `_Fuck`
-(uppercase)
-- ` FUCK`
-- `FUCK `
-- `FUCK_`
-- `_FUCK`
-although that would ignore a lot of variables such as `FuckThisShit` `godFuckingDaminit`,
-I believe as a first check we can compare the counts for
-- (` fuck` or `fuck ` or `fuck_` or `_fuck`) with plain ol' `fuck`
-- same with capitalized and uppercase
-- same with other swear words ((`shit_` or ...)  to `shit`)
-this might give us an intial idea of how to move forwards in this fuckery
+- `_fuck_`
+this will have to be 7 different api calls
+which means, with github search rest api rate limit of 10 requests per minute,
+roughly one swear word every 45 seconds,
+or ~3 swear words every 2 minutes.
 
-another plan which we may save for later/for when I have a better clue on how to move in here, would be
-- get the results for `fuck`, just good ol' `fuck`, and a pagination of 1k results, with annexed text matches (which we know github can do)
-  go through all the matches you got and for *those* matches, regex to get a finer estimate
-  infer/extrapolate whatever info from the results of the various matches
+At least the search results are case insensitive so we won't need to do the same thing for `Fuck` and `FUCK`, meaning 7 calls instead of 21 calls per swear word, which would have been quite the load of fuck.
+
+## plan of attack
+[to be formulated]
+
+> another plan which we may save for later/for when I have a better clue on how to move in here, would be
+> - get the results for `fuck`, just good ol' `fuck`, and a pagination of 1k results, with annexed text matches (which we know github can do)
+>   go through all the matches you got and for *those* matches, regex to get a finer estimate
+>   infer/extrapolate whatever info from the results of the various matches
