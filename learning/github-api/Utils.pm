@@ -1,16 +1,17 @@
 # module metadata
-# ------------------
+# ---------------
 package Utils;
 require Exporter;
 our @ISA    = ('Exporter');
-our @EXPORT = ('sprintln', 'aprintln', 'println',
+our @EXPORT = ('def',
+               'sprintln', 'aprintln', 'println',
                'char_at', 'str_chars',
                'quote_if_space',
                'triml', 'trimr', 'trimlr', 'trim',
                'percent_encode_char', 'percent_encode_str',
                'slurp_fn', 'slurp',
                'take', 'drop',
-               );
+    );
 our @EXPORT_OK = @EXPORT;
 our $VERSION = 1.00;
 
@@ -19,6 +20,12 @@ our $VERSION = 1.00;
 use strict;
 use warnings;
 use feature 'signatures';
+
+# provide default value
+# ---------------------
+sub def($a, $b) {
+    return (defined $a)?$a:$b;
+}
 
 # println&Co.
 # -----------

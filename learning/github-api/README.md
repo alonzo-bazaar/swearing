@@ -56,6 +56,21 @@ or ~3 swear words every 2 minutes.
 
 At least the search results are case insensitive so we won't need to do the same thing for `Fuck` and `FUCK`, meaning 7 calls instead of 21 calls per swear word, which would have been quite the load of fuck.
 
+as an additional aside:
+Min commits, min contributors, and a lot of other shit we'd like to check
+do not seem to be supported by the github repository search rest api.
+As of writing at least, none of them are listed in the [documentation](https://docs.github.com/en/search-github/searching-on-github/searching-for-repositories)
+
+min contributors would be enforceable, by adding even more api calls, (one per repo)
+see [repo search api docs](https://docs.github.com/en/rest/repos/repos?apiVersion=2026-03-10#list-repository-contributors) for further info
+there does not seem to be a rate limit for the /repos endpoint and its sub-endpoints
+(it is not listed [in the docs for rate limits](https://docs.github.com/en/rest/rate-limit/rate-limit?apiVersion=2026-03-10))
+but getting the contributor amount for all repos would require having the links for all reposm,
+which would require paginating through all the repos returned by our /search api call
+
+I'm afraid for commits it's the same thing, though I have yet to check
+so I am currently only using min stars as a filter
+
 ## plan of attack
 [to be formulated]
 

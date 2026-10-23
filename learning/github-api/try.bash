@@ -5,7 +5,7 @@
 [[ -n "${STRICT}" ]] && set -euo pipefail
 [[ -n "${TRACE}"  ]] && set -x
 
-GITHUB_API_VERSION='2026-03-10 '
+GITHUB_API_VERSION='2026-03-10'
 GITHUB_TOKEN="$(cat "${HOME}/.methlab/github-tokens/alonzo")"
 PER_PAGE='1'
 # LANGUAGES=( 'c++' )
@@ -28,6 +28,9 @@ pes() {
     datum="${datum//-/%2D}"
     datum="${datum//:/%3A}"
     datum="${datum//_/%5F}"
+    datum="${datum//\</%3C}"
+    datum="${datum//\=/%3D}"
+    datum="${datum//\>/%3E}"
     echo "$datum"
 }
 
@@ -54,26 +57,27 @@ join () {
     join_with "" "$@"
 }
 
-# LANGS="${ join_with '+' "${ pes 'language:"c"' ; }" "${ pes 'language:"go"' ; }" "${ pes 'language:"java"' ; }" ; }"
+LANGS="${ join_with '+' "${ pes 'language:"c"' ; }" "${ pes 'language:"go"' ; }" "${ pes 'language:"java"' ; }" ; }"
 # LANGS="${ join_with '+' "${ pes 'language:"go"' ; }" "${ pes 'language:"java"' ; }" ; }"
-LANGS="${ join_with '+' "${ pes 'language:"java"' ; }" ; }"
+# LANGS="${ join_with '+' "${ pes 'language:"java"' ; }" ; }"
                         
 
 idfk() {
     WS="${ pes "$1" ; }"
     echo -n "count of [$1]: "
     curl --no-progress-meter\
-        -L "${ join "https://api.github.com/search/code"\
+        -L "${ join "https://api.github.com/search/repositories"\
         "?q=${WS}"\
-        "+in:file"\
-        "+${LANGS}"\
+        "+stars:>5"\
         "&per_page=${PER_PAGE}" ; }"\
-        -H "Accept:  application/vnd.github.text-match+json"\
+        -H "Accept: application/vnd.github.text-match+json"\
         -H "Authorization: Bearer ${GITHUB_TOKEN}"\
         -H "X-GitHub-Api-Version: ${GITHUB_API_VERSION}" | jq '.total_count'
-    [[ $? ]] || fatal "query failed"
+
+    if ! [[ $? ]]; then fatal "query failed"; fi
 }
-TRIES=( '"fuck"' '"shit"' )
+# TRIES=( '"fuck"' '"shit"' )
+TRIES=( '"fuck"' )
 
 for i in "${TRIES[@]}" ; do
     idfk "$i"
