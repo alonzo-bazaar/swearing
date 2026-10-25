@@ -98,7 +98,8 @@ sub code_count_response(%kwargs) {
 sub repo_count_response(%kwargs) {
     my @words     = @{$kwargs{'words'}}    or die 'words required';
     my @langs     = @{$kwargs{'langs'}}    or die 'langs required';
-    my $min_stars =   $kwargs{'min_stars'} or die 'min_stars required';
+    my $min_stars = $kwargs{'min_stars'};
+    die 'min_stars required' if not defined($kwargs{'min_stars'});
 
     my $words_query = percent_encode_str(join(' ', map { "\"$_\"" } @words));
     my $langs_query = join('+', map { percent_encode_str("language:\"$_\"") }
@@ -139,7 +140,8 @@ sub demo () {
 
     print "search type,programming language,min stars,swear word,number of matches\n";
     # which swear words are more common in code?
-    foreach $swear (@ALL_SWEARS) {
+    #foreach $swear (@ALL_SWEARS) {
+    if (0) {
         print("code,all langs,-1,$swear,"
               .code_count(words=>[$swear],
                           langs=>\@ALL_LANGS)
@@ -148,7 +150,8 @@ sub demo () {
     }
 
     # swear frequency in code by swear word and (code) language
-    foreach $lang (@ALL_LANGS) {
+    # foreach $lang (@ALL_LANGS) {
+    if (0) {
         foreach $swear (@ALL_SWEARS) {
             print("code,$lang,-1,$swear,"
                   .code_count(words=>[$swear],
