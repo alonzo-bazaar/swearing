@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+
 use strict;
 use warnings;
 use feature 'signatures';
@@ -146,9 +147,6 @@ sub repo_count(%kwargs) {
 # (to be table'd later)
 sub demo () {
     my ($lang, $swear, $min_stars);
-    @ALL_SWEARS=( 'fuck' );
-    @ALL_LANGS=( 'java' );
-    
 
     print "search type,programming language,min stars,swear word,number of matches\n";
     # which swear words are more common in code?
