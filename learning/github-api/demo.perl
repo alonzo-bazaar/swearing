@@ -146,11 +146,13 @@ sub repo_count(%kwargs) {
 # (to be table'd later)
 sub demo () {
     my ($lang, $swear, $min_stars);
+    @ALL_SWEARS=( 'fuck' );
+    @ALL_LANGS=( 'java' );
+    
 
     print "search type,programming language,min stars,swear word,number of matches\n";
     # which swear words are more common in code?
-    #foreach $swear (@ALL_SWEARS) {
-    if (0) {
+    foreach $swear (@ALL_SWEARS) {
         print("code,all langs,-1,$swear,"
               .code_count(words=>[$swear],
                           langs=>\@ALL_LANGS)
@@ -159,8 +161,7 @@ sub demo () {
     }
 
     # swear frequency in code by swear word and (code) language
-    # foreach $lang (@ALL_LANGS) {
-    if (0) {
+    foreach $lang (@ALL_LANGS) {
         foreach $swear (@ALL_SWEARS) {
             print("code,$lang,-1,$swear,"
                   .code_count(words=>[$swear],
@@ -173,8 +174,7 @@ sub demo () {
     # which swear words are more common in repo metadata?
     # (title, readme, and the like)
     # with varying constraints on stars
-    #for $min_stars ((0, 5, 10)) {
-    if(0) {
+    for $min_stars ((0, 5, 10)) {
         foreach $swear (@ALL_SWEARS) {
             print("repo,all langs,$min_stars,$swear,"
                   .repo_count(words=>[$swear],
@@ -187,8 +187,7 @@ sub demo () {
 
     # which swear words are more common in repo metadata, by programming language
     # with varying constraints on stars
-    #for $min_stars ((0, 5, 10)) {
-    if(0) {
+    for $min_stars ((0, 5, 10)) {
         foreach $lang (@ALL_LANGS) {
             foreach $swear (@ALL_SWEARS) {
                 print("repo,$lang,$min_stars,$swear,"
