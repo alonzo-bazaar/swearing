@@ -53,8 +53,10 @@ my @ALL_SWEARS = ('motherfucker', 'asshole',
 
 # https://docs.github.com/en/rest/search/search?apiVersion=2026-03-10#search-code
 sub code_count_response(%kwargs) {
-    my @words = @{$kwargs{'words'}} or die 'words required';
-    my @langs = @{$kwargs{'langs'}} or die 'langs required';
+    my @words     = @{$kwargs{'words'}};
+    my @langs     = @{$kwargs{'langs'}};
+    die 'words required'     if not grep $_ eq 'words' , keys(%kwargs);
+    die 'langs required'     if not grep $_ eq 'langs' , keys(%kwargs);
 
     # note: when providing multiple words the github api takes this as an *and*
     # code_count_response(words=>['a', 'b', 'c']) will search for files
@@ -96,17 +98,24 @@ sub code_count_response(%kwargs) {
 
 # https://docs.github.com/en/rest/search/search?apiVersion=2026-03-10#search-repositories
 sub repo_count_response(%kwargs) {
-    my @words     = @{$kwargs{'words'}}    or die 'words required';
-    my @langs     = @{$kwargs{'langs'}}    or die 'langs required';
+    my @words     = @{$kwargs{'words'}};
+    my @langs     = @{$kwargs{'langs'}};
     my $min_stars = $kwargs{'min_stars'};
-    die 'min_stars required' if not defined($kwargs{'min_stars'});
+    die 'words required'     if not grep $_ eq 'words'    , keys(%kwargs);
+    die 'langs required'     if not grep $_ eq 'langs'    , keys(%kwargs);
+    die 'min_stars required' if not grep $_ eq 'min_stars', keys(%kwargs);
 
     my $words_query = percent_encode_str(join(' ', map { "\"$_\"" } @words));
     my $langs_query = join('+', map { percent_encode_str("language:\"$_\"") }
                            @langs);
+
+    # for repo count @words can be empty
+    # ergo the (@words?"+":"")
+    # $words_query will be empty if @words is empty
+    # meaning both $words_query and (@words?"+":"") will result in a no-op for
+    # joining if we were provided with an empty words array
     my $req_url = join('', ("https://api.github.com/search/repositories",
-                            "?q=", $words_query,
-                            "+",   $langs_query,
+                            "?q=", $words_query, (@words?"+":""), $langs_query,
                             "+",   percent_encode_str("stars:>=$min_stars"),
                             "&per_page=", $PER_PAGE,
                        ));
@@ -164,7 +173,8 @@ sub demo () {
     # which swear words are more common in repo metadata?
     # (title, readme, and the like)
     # with varying constraints on stars
-    for $min_stars ((0, 5, 10)) {
+    #for $min_stars ((0, 5, 10)) {
+    if(0) {
         foreach $swear (@ALL_SWEARS) {
             print("repo,all langs,$min_stars,$swear,"
                   .repo_count(words=>[$swear],
@@ -177,8 +187,8 @@ sub demo () {
 
     # which swear words are more common in repo metadata, by programming language
     # with varying constraints on stars
-
-    for $min_stars ((0, 5, 10)) {
+    #for $min_stars ((0, 5, 10)) {
+    if(0) {
         foreach $lang (@ALL_LANGS) {
             foreach $swear (@ALL_SWEARS) {
                 print("repo,$lang,$min_stars,$swear,"
@@ -188,6 +198,19 @@ sub demo () {
                       ."\n");
                 sleep 6;
             }
+        }
+    }
+
+    # now for compairison's sake, how many repos are there even in each langauge?
+    # with varying constraints on stars
+    for $min_stars ((0, 5, 10)) {
+        foreach $lang (@ALL_LANGS) {
+            print("repo,$lang,$min_stars,no swear word,"
+                  .repo_count(words=>[],
+                              langs=>[$lang],
+                              min_stars=>$min_stars)
+                  ."\n");
+            sleep 6;
         }
     }
 }

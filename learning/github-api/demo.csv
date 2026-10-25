@@ -1,3 +1,4 @@
+search type,programming language,min stars,swear word,number of matches
 code,all langs,-1,motherfucker,14368
 code,all langs,-1,asshole,29440
 code,all langs,-1,cunt,110592
@@ -128,3 +129,309 @@ code,go,-1,dick,8496
 code,go,-1,damn,4776
 code,go,-1,darn,23616
 code,go,-1,gosh,20032
+repo,all langs,0,motherfucker,86
+repo,all langs,0,asshole,192
+repo,all langs,0,cunt,339
+repo,all langs,0,fuck,10294
+repo,all langs,0,shit,12845
+repo,all langs,0,bitch,1646
+repo,all langs,0,dick,1997
+repo,all langs,0,damn,3331
+repo,all langs,0,darn,604
+repo,all langs,0,gosh,2805
+repo,all langs,5,motherfucker,1
+repo,all langs,5,asshole,7
+repo,all langs,5,cunt,2
+repo,all langs,5,fuck,728
+repo,all langs,5,shit,435
+repo,all langs,5,bitch,72
+repo,all langs,5,dick,42
+repo,all langs,5,damn,242
+repo,all langs,5,darn,36
+repo,all langs,5,gosh,132
+repo,all langs,10,motherfucker,1
+repo,all langs,10,asshole,4
+repo,all langs,10,cunt,0
+repo,all langs,10,fuck,452
+repo,all langs,10,shit,210
+repo,all langs,10,bitch,41
+repo,all langs,10,dick,16
+repo,all langs,10,damn,146
+repo,all langs,10,darn,21
+repo,all langs,10,gosh,82
+repo,javascript,0,motherfucker,26
+repo,javascript,0,asshole,67
+repo,javascript,0,cunt,89
+repo,javascript,0,fuck,2179
+repo,javascript,0,shit,3205
+repo,javascript,0,bitch,440
+repo,javascript,0,dick,595
+repo,javascript,0,damn,807
+repo,javascript,0,darn,168
+repo,javascript,0,gosh,557
+repo,python,0,motherfucker,12
+repo,python,0,asshole,59
+repo,python,0,cunt,43
+repo,python,0,fuck,3531
+repo,python,0,shit,3128
+repo,python,0,bitch,293
+repo,python,0,dick,475
+repo,python,0,damn,864
+repo,python,0,darn,139
+repo,python,0,gosh,304
+repo,typescript,0,motherfucker,8
+repo,typescript,0,asshole,12
+repo,typescript,0,cunt,26
+repo,typescript,0,fuck,804
+repo,typescript,0,shit,1350
+repo,typescript,0,bitch,168
+repo,typescript,0,dick,179
+repo,typescript,0,damn,318
+repo,typescript,0,darn,99
+repo,typescript,0,gosh,277
+repo,java,0,motherfucker,13
+repo,java,0,asshole,14
+repo,java,0,cunt,139
+repo,java,0,fuck,986
+repo,java,0,shit,1345
+repo,java,0,bitch,122
+repo,java,0,dick,222
+repo,java,0,damn,320
+repo,java,0,darn,54
+repo,java,0,gosh,212
+repo,c++,0,motherfucker,7
+repo,c++,0,asshole,7
+repo,c++,0,cunt,10
+repo,c++,0,fuck,695
+repo,c++,0,shit,993
+repo,c++,0,bitch,97
+repo,c++,0,dick,105
+repo,c++,0,damn,164
+repo,c++,0,darn,23
+^[[6~repo,c++,0,gosh,45
+repo,c,0,motherfucker,3
+repo,c,0,asshole,4
+repo,c,0,cunt,4
+repo,c,0,fuck,474
+repo,c,0,shit,604
+repo,c,0,bitch,78
+repo,c,0,dick,53
+repo,c,0,damn,122
+repo,c,0,darn,16
+repo,c,0,gosh,39
+repo,php,0,motherfucker,2
+repo,php,0,asshole,4
+repo,php,0,cunt,6
+repo,php,0,fuck,261
+repo,php,0,shit,420
+repo,php,0,bitch,95
+repo,php,0,dick,116
+repo,php,0,damn,220
+repo,php,0,darn,36
+repo,php,0,gosh,85
+repo,c#,0,motherfucker,7
+repo,c#,0,asshole,15
+repo,c#,0,cunt,9
+repo,c#,0,fuck,582
+repo,c#,0,shit,986
+repo,c#,0,bitch,108
+repo,c#,0,dick,159
+repo,c#,0,damn,263
+repo,c#,0,darn,24
+repo,c#,0,gosh,92
+repo,kotlin,5,motherfucker,0
+repo,kotlin,5,asshole,0
+repo,kotlin,5,cunt,0
+repo,kotlin,5,fuck,38
+repo,kotlin,5,shit,5
+repo,kotlin,5,bitch,4
+repo,kotlin,5,dick,0
+repo,kotlin,5,damn,1
+repo,kotlin,5,darn,0
+repo,kotlin,5,gosh,1
+repo,ruby,5,motherfucker,0
+repo,ruby,5,asshole,0
+repo,ruby,5,cunt,0
+repo,ruby,5,fuck,18
+repo,ruby,5,shit,11
+repo,ruby,5,bitch,0
+repo,ruby,5,dick,2
+repo,ruby,5,damn,7
+repo,ruby,5,darn,1
+repo,ruby,5,gosh,1
+repo,swift,5,motherfucker,0
+repo,swift,5,asshole,0
+repo,swift,5,cunt,0
+repo,swift,5,fuck,11
+repo,swift,5,shit,4
+repo,swift,5,bitch,3
+repo,swift,5,dick,0
+repo,swift,5,damn,3
+repo,swift,5,darn,1
+repo,swift,5,gosh,1
+repo,go,5,motherfucker,1
+repo,go,5,asshole,0
+repo,go,5,cunt,0
+repo,go,5,fuck,37
+repo,go,5,shit,16
+repo,go,5,bitch,3
+repo,go,5,dick,1
+repo,go,5,damn,6
+repo,go,5,darn,4
+repo,go,5,gosh,95
+repo,javascript,10,motherfucker,0
+repo,javascript,10,asshole,1
+repo,javascript,10,cunt,0
+repo,javascript,10,fuck,99
+repo,javascript,10,shit,60
+repo,javascript,10,bitch,6
+repo,javascript,10,dick,4
+repo,javascript,10,damn,38
+repo,javascript,10,darn,5
+repo,javascript,10,gosh,4
+repo,python,10,motherfucker,0
+repo,python,10,asshole,1
+repo,python,10,cunt,0
+repo,python,10,fuck,138
+repo,python,10,shit,52
+repo,python,10,bitch,11
+repo,python,10,dick,9
+repo,python,10,damn,39
+repo,python,10,darn,9
+repo,python,10,gosh,5
+repo,typescript,10,motherfucker,0
+repo,typescript,10,asshole,0
+repo,typescript,10,cunt,0
+repo,typescript,10,fuck,15
+repo,typescript,10,shit,26
+repo,typescript,10,bitch,4
+repo,typescript,10,dick,0
+repo,typescript,10,damn,8
+repo,typescript,10,darn,0
+repo,typescript,10,gosh,4
+repo,java,10,motherfucker,0
+repo,java,10,asshole,0
+repo,java,10,cunt,0
+repo,java,10,fuck,42
+repo,java,10,shit,10
+repo,java,10,bitch,1
+repo,java,10,dick,0
+repo,java,10,damn,9
+repo,java,10,darn,1
+repo,java,10,gosh,2
+repo,c++,10,motherfucker,0
+repo,c++,10,asshole,0
+repo,c++,10,cunt,0
+repo,c++,10,fuck,26
+repo,c++,10,shit,14
+repo,c++,10,bitch,3
+repo,c++,10,dick,0
+repo,c++,10,damn,10
+repo,c++,10,darn,1
+repo,c++,10,gosh,1
+repo,c,10,motherfucker,0
+repo,c,10,asshole,2
+repo,c,10,cunt,0
+repo,c,10,fuck,19
+repo,c,10,shit,13
+repo,c,10,bitch,4
+repo,c,10,dick,2
+repo,c,10,damn,13
+repo,c,10,darn,0
+repo,c,10,gosh,0
+repo,php,10,motherfucker,0
+repo,php,10,asshole,0
+repo,php,10,cunt,0
+repo,php,10,fuck,13
+repo,php,10,shit,7
+repo,php,10,bitch,0
+repo,php,10,dick,0
+repo,php,10,damn,17
+repo,php,10,darn,1
+repo,php,10,gosh,1
+repo,c#,10,motherfucker,0
+repo,c#,10,asshole,0
+repo,c#,10,cunt,0
+repo,c#,10,fuck,26
+repo,c#,10,shit,13
+repo,c#,10,bitch,4
+repo,c#,10,dick,0
+repo,c#,10,damn,5
+repo,c#,10,darn,0
+repo,c#,10,gosh,2
+repo,kotlin,10,motherfucker,0
+repo,kotlin,10,asshole,0
+repo,kotlin,10,cunt,0
+repo,kotlin,10,fuck,31
+repo,kotlin,10,shit,2
+repo,kotlin,10,bitch,3
+repo,kotlin,10,dick,0
+repo,kotlin,10,damn,1
+repo,kotlin,10,darn,0
+repo,kotlin,10,gosh,1
+repo,ruby,10,motherfucker,0
+repo,ruby,10,asshole,0
+repo,ruby,10,cunt,0
+repo,ruby,10,fuck,12
+repo,ruby,10,shit,5
+repo,ruby,10,bitch,0
+repo,ruby,10,dick,0
+repo,ruby,10,damn,2
+repo,ruby,10,darn,1
+repo,ruby,10,gosh,0
+repo,swift,10,motherfucker,0
+repo,swift,10,asshole,0
+repo,swift,10,cunt,0
+repo,swift,10,fuck,7
+repo,swift,10,shit,1
+repo,swift,10,bitch,3
+repo,swift,10,dick,0
+repo,swift,10,damn,3
+repo,swift,10,darn,1
+repo,swift,10,gosh,1
+repo,go,10,motherfucker,1
+repo,go,10,asshole,0
+repo,go,10,cunt,0
+repo,go,10,fuck,24
+repo,go,10,shit,7
+repo,go,10,bitch,2
+repo,go,10,dick,1
+repo,go,10,damn,1
+repo,go,10,darn,2
+repo,go,10,gosh,61
+repo,javascript,0,no swear word,48372440
+repo,python,0,no swear word,35234170
+repo,typescript,0,no swear word,19451276
+repo,java,0,no swear word,21925332
+repo,c++,0,no swear word,7258093
+repo,c,0,no swear word,4414096
+repo,php,0,no swear word,6464131
+repo,c#,0,no swear word,7796030
+repo,kotlin,0,no swear word,2426292
+repo,ruby,0,no swear word,2972659
+repo,swift,0,no swear word,1737888
+repo,go,0,no swear word,2581312
+repo,javascript,5,no swear word,636322
+repo,python,5,no swear word,983112
+repo,typescript,5,no swear word,332845
+repo,java,5,no swear word,272294
+repo,c++,5,no swear word,255002
+repo,c,5,no swear word,181545
+repo,php,5,no swear word,147225
+repo,c#,5,no swear word,172579
+repo,kotlin,5,no swear word,58004
+repo,ruby,5,no swear word,78129
+repo,swift,5,no swear word,64285
+repo,go,5,no swear word,158142
+repo,javascript,10,no swear word,351650
+repo,python,10,no swear word,576350
+repo,typescript,10,no swear word,193194
+repo,java,10,no swear word,151355
+repo,c++,10,no swear word,150415
+repo,c,10,no swear word,107658
+repo,php,10,no swear word,81122
+repo,c#,10,no swear word,98353
+repo,kotlin,10,no swear word,34990
+repo,ruby,10,no swear word,44825
+repo,swift,10,no swear word,39954
+repo,go,10,no swear word,98021
