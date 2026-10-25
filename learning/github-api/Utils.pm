@@ -92,7 +92,7 @@ sub percent_encode_str ($s) {
 # --------------
 sub slurp_fn ($fn) { 
     open(SLURPED_FILE, "<", $fn) or die "cannot open file $fn for slurping: $!";
-    my $fc = <SLURPED_FILE>;
+    my $fc = join '', <SLURPED_FILE>;
     close(SLURPED_FILE);
     return $fc;
 }

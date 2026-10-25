@@ -34,30 +34,27 @@ my $PER_PAGE = 1;
 # top languages from
 # https://innovationgraph.github.com/global-metrics/programming-languages 
 # as of 19 Oct 2026
-my @LANGS =
-    ('javascript', 'python', 'typescript',
-     # 'shell', 'dockerfile',
-     'java', 'c++', 'c',
-     # 'makefile', 'batchfile',
-     'php', 'c#',
-     # 'powershell', 'cmake',
-     'kotlin', 'ruby', 'swift', 'go');
-my $MIN_STARS = 5;
-
-my @SWEARS =
-    ('motherfucker', 'asshole',
-     'cunt', 'fuck', 'shit', 'bitch', 'dick',
-     'damn', 'darn', 'gosh',);
+my @ALL_LANGS = ('javascript', 'python', 'typescript',
+                 # 'shell', 'dockerfile',
+                 'java', 'c++', 'c',
+                 # 'makefile', 'batchfile',
+                 'php', 'c#',
+                 # 'powershell', 'cmake',
+                 'kotlin', 'ruby', 'swift', 'go');
+my @ALL_SWEARS = ('motherfucker', 'asshole',
+                  'cunt', 'fuck', 'shit', 'bitch', 'dick',
+                  'damn', 'darn', 'gosh',);
 
 # script core logic
 # -----------------
-## send request
-## ------------
-# https://docs.github.com/en/rest/search/search?apiVersion=2026-03-10#search-repositories
+
+## send requests
+## -------------
+
+# https://docs.github.com/en/rest/search/search?apiVersion=2026-03-10#search-code
 sub code_count_response(%kwargs) {
     my @words = @{$kwargs{'words'}} or die 'words required';
-    my @langs = @{def($kwargs{'langs'}, \@LANGS)};
-    my $min_stars = def($kwargs{'min_stars'} , $MIN_STARS);
+    my @langs = @{$kwargs{'langs'}} or die 'langs required';
 
     # note: when providing multiple words the github api takes this as an *and*
     # code_count_response(words=>['a', 'b', 'c']) will search for files
@@ -67,8 +64,8 @@ sub code_count_response(%kwargs) {
                            @langs);
     my $req_url = join('', ("https://api.github.com/search/code",
                             "?q=", $words_query,
-                            "+",   percent_encode_str("in:file"),
                             "+",   $langs_query,
+                            "+",   percent_encode_str("in:file"),
                             "&per_page=", $PER_PAGE,
                        ));
     open(RES_OUT, '-|', 'curl',
@@ -88,7 +85,7 @@ sub code_count_response(%kwargs) {
     # which works if curl gives us a json without newlines
     # but that's not always the case
     # in a vector contexs (which will be supplied by join) <> does slurp
-    # all lines
+    # all lines, and to join them you can join '', <>
     # (fuck my life)
     my $response_contents = join '', <RES_OUT>;
     close(RES_OUT);
@@ -96,13 +93,19 @@ sub code_count_response(%kwargs) {
     return %{$response_contents};
 }
 
+
+# https://docs.github.com/en/rest/search/search?apiVersion=2026-03-10#search-repositories
 sub repo_count_response(%kwargs) {
-    my @words = @{$kwargs{'words'}} or die 'words required';
-    my $min_stars = def($kwargs{'min_stars'} , $MIN_STARS);
+    my @words     = @{$kwargs{'words'}}    or die 'words required';
+    my @langs     = @{$kwargs{'langs'}}    or die 'langs required';
+    my $min_stars =   $kwargs{'min_stars'} or die 'min_stars required';
 
     my $words_query = percent_encode_str(join(' ', map { "\"$_\"" } @words));
+    my $langs_query = join('+', map { percent_encode_str("language:\"$_\"") }
+                           @langs);
     my $req_url = join('', ("https://api.github.com/search/repositories",
                             "?q=", $words_query,
+                            "+",   $langs_query,
                             "+",   percent_encode_str("stars:>=$min_stars"),
                             "&per_page=", $PER_PAGE,
                        ));
@@ -132,45 +135,57 @@ sub repo_count(%kwargs) {
 # outputs all info for demo in a csv format
 # (to be table'd later)
 sub demo () {
-    my ($lang, $swear);
+    my ($lang, $swear, $min_stars);
 
-    print "mode,constraint,swear,amount\n";
-    # swear frequency by swear
-    foreach $swear (@SWEARS) {
-        print "code,all_langs,$swear,".code_count(words=>[$swear], langs=>\@LANGS)."\n";
+    print "search type,programming language,min stars,swear word,number of matches\n";
+    # which swear words are more common in code?
+    foreach $swear (@ALL_SWEARS) {
+        print("code,all langs,-1,$swear,"
+              .code_count(words=>[$swear],
+                          langs=>\@ALL_LANGS)
+              ."\n");
         sleep 6;
     }
 
-    # swear frequency by swear and lang
-    foreach $lang (@LANGS) {
-        foreach $swear (@SWEARS) {
-            print "code,$lang,$swear,".code_count(words=>[$swear], langs=>[$lang])."\n";
+    # swear frequency in code by swear word and (code) language
+    foreach $lang (@ALL_LANGS) {
+        foreach $swear (@ALL_SWEARS) {
+            print("code,$lang,-1,$swear,"
+                  .code_count(words=>[$swear],
+                              langs=>[$lang])
+                  ."\n");
             sleep 6;
         }
     }
 
-    # frequency of swear word usage in repository metadata
+    # which swear words are more common in repo metadata?
     # (title, readme, and the like)
-    # ----------------------------------------------------
-    foreach $swear (@SWEARS) {
-        print "repo,0,$swear,".repo(words=>[$swear], min_stars=>0)."\n";
-        sleep 6;
+    # with varying constraints on stars
+    for $min_stars ((0, 5, 10)) {
+        foreach $swear (@ALL_SWEARS) {
+            print("repo,all langs,$min_stars,$swear,"
+                  .repo_count(words=>[$swear],
+                              langs=>\@ALL_LANGS,
+                              min_stars=>$min_stars)
+                  ."\n");
+            sleep 6;
+        }
     }
 
-    # frequency of swear word usage in repository metadata
-    # for repositorories with at least 5 stars
-    # ----------------------------------------------------
-    foreach $swear (@SWEARS) {
-        print "repo,5,$swear,".repo(words=>[$swear], min_stars=>5)."\n";
-        sleep 6;
-    }
+    # which swear words are more common in repo metadata, by programming language
+    # with varying constraints on stars
 
-    # frequency of swear word usage in repository metadata
-    # for repositorories with at least 10 stars
-    # ----------------------------------------------------
-    foreach $swear (@SWEARS) {
-        print "repo,10,$swear,".repo(words=>[$swear], min_stars=>10)."\n";
-        sleep 6;
+    for $min_stars ((0, 5, 10)) {
+        foreach $lang (@ALL_LANGS) {
+            foreach $swear (@ALL_SWEARS) {
+                print("repo,$lang,$min_stars,$swear,"
+                      .repo_count(words=>[$swear],
+                                  langs=>[$lang],
+                                  min_stars=>$min_stars)
+                      ."\n");
+                sleep 6;
+            }
+        }
     }
 }
 
