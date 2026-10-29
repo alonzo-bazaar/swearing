@@ -66,13 +66,12 @@ idfk() {
     WS="${ pes "$1" ; }"
     echo -n "count of [$1]: "
     curl --no-progress-meter\
-        -L "${ join "https://api.github.com/search/repositories"\
+        -L "${ join "https://api.github.com/search/code"\
         "?q=${WS}"\
-        "+stars:>5"\
-        "&per_page=${PER_PAGE}" ; }"\
+        "&per_page=1" ; }"\
         -H "Accept: application/vnd.github.text-match+json"\
         -H "Authorization: Bearer ${GITHUB_TOKEN}"\
-        -H "X-GitHub-Api-Version: ${GITHUB_API_VERSION}" | jq '.total_count'
+        -H "X-GitHub-Api-Version: ${GITHUB_API_VERSION}" # | jq '.total_count'
 
     if ! [[ $? ]]; then fatal "query failed"; fi
 }

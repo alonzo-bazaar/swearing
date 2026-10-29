@@ -1,1 +1,6 @@
+# contains copyrighted material
 docs/*
+# big fucking csv files
+data/*.csv
+# most will be examples and shit
+*.json
