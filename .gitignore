@@ -1,6 +1,9 @@
-# contains copyrighted material
+# this dir contains copyrighted material
+# (study/reference material for this project)
 docs/*
-# big fucking csv files
-data/*.csv
-# most will be examples and shit
+# I'm working with some big fucking csv files, so ignore all csv
+# (downloaded from https://seart-ghs.si.usi.ch/)
+*.csv
+# and a lot of big and useless json
+# (saving the result of api calls to see how it looks like)
 *.json
