@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+set -x
+
+SCRIPT_DIR="$(dirname "$0")"
+DATA_DIR="${SCRIPT_DIR}/data"
+
+[[ -d "${DATA_DIR}" ]] || mkdir -p "${DATA_DIR}"
+cd "${DATA_DIR}"
+
+[[ -d 'linux'   ]] || git clone --depth=1 --branch=master 'https://github.com/torvalds/linux'
+[[ -d 'httd'    ]] || git clone --depth=1 --branch=trunk  'https://github.com/apache/httpd'
+[[ -f 'kjv.txt' ]] || curl -LO 'https://openbible.com/textfiles/kjv.txt'

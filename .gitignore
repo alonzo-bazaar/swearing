@@ -1,9 +1,16 @@
 # this dir contains copyrighted material
 # (study/reference material for this project)
 docs/*
-# I'm working with some big fucking csv files, so ignore all csv
-# (downloaded from https://seart-ghs.si.usi.ch/)
+
+# experimentations dir contains trial code for a whole bunch of aspects of this project
+# it's akin to a scratchpad
+# to run the experimentations in question though we're gonna need some test data
+# which I'd much rather *not* commit, 'cause we're using some comically large test data
+experimentations/data
+
+# given that I'm working with some big fucking csv files, ignore all csv files
 *.csv
-# and a lot of big and useless json
-# (saving the result of api calls to see how it looks like)
+# idem avec pommes de terre for json
 *.json
+
+
