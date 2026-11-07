@@ -1,6 +1,30 @@
 #!/usr/bin/env bash
-set -x
-./ohboi.pl wordlist  > pl
-./stripped.bqn wordlist > bq
-diff pl bq
-rm pl bq
+[[ -v DEBUG ]] && set -x
+
+BASELINE='./ohboi.pl'
+UNDER_TEST='./ohgirl.bqn'
+
+cleanup() {
+    [[ -f bl_out ]] && rm bl_out
+    [[ -f ut_out ]] && rm ut_out
+}
+
+run-test() {
+    "${BASELINE}"   wordlist > bl_out
+    "${UNDER_TEST}" wordlist > ut_out
+    diff bl_out ut_out
+}
+
+main() {
+    # prevent any eventual leftover output from last iteration from polluting the
+    # environment in which this iteration is gonna run
+    cleanup
+
+    # do the damn thing
+    run-test
+
+    # clean up after yourself, you filthy animal
+    cleanup
+}
+
+main "$@"

@@ -1,0 +1,28 @@
+Got 1743 samples
+GC: 15 samples
+(compiler): 4 samples
+./stripped.bqn: 1724 samples:
+      │#!/usr/bin/env bqn
+      │LCP ← 'a'⊸≤∧'z'⊸≥ 
+      │UCP ← 'A'⊸≤∧'Z'⊸≥ 
+      │DC  ← (⊢+32×UCP)  
+      │UC  ← (⊢-32×LCP)  
+    51│kjv ← DC •Fbytes "data/kjv.txt"
+      │lca ← (⊣+↕∘¬˜)´"az" 
+   136│aleq ← <˘ lca =⌜ kjv   
+      │
+      │smc ← ⟨⟩ # smc: shifted mask cache
+     1│SM ← {
+    57│     li𝕊sb : 0≠≠ch←(li‿sb≡⊑)¨⊸/smc  ? 1⊑⊑ch ;
+   287│     li𝕊sb : smc ∾⟜⟨li‿sb, res←sb↓li⊑aleq⟩↩ ⋄ res
+      │}
+      │
+      │WordFreq ← { 𝕊w:
+      │    #arrs ← aleq ⊏˜ w-'a'
+      │    l  ← kjv -○≠ w 
+  1159│    wi ← / ∧´ l⊸↑¨ (w-'a') SM¨ ↕≠w
+    20│    wc ← +´ ¬ (LCP kjv⊏˜ 0⌈wi-1) ∨ (LCP kjv⊏˜ (1-˜≠kjv) ⌊ wi+≠w)
+     2│    wc + (w≡kjv ↑˜ ≠w) + (w≡kjv ↑˜-≠w)
+      │}
+    11│O ← {𝕊𝕩: •Out 𝕩 ∾ ": " ∾ •Repr WordFreq 𝕩}
+      │O¨ •Flines ⊑ •args

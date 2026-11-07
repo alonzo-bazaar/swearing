@@ -1,0 +1,227 @@
+notes for whatever the fuck is going on in ~ohgirl.bqn~, 'cause  that shit's /involved/
+
+* introduction
+** goals
+before illustrating our pipeline let's set a couple of goals for what we're trying to do, so the pipeline becomes clearer once we know what we're building the pipeline around
+
+we have a long text and a list of words, and we want to know how ofted does every word appear in the long text
+
+we do this by getting every index in the big text where the word appears as a substring, then we check at the word boundaries to see if that substring constituted a word (what we're looking for) or if it was a substring in another word (not what we're looking for)
+
+** initial funky approach
+to get those indices... this is where our approach starts to get /funky/
+
+say we wanna look for the word 'bird'
+our earlier approach was to have 27 precomputed bitmasks for
+- ~text = 'a'~
+- ~text = 'b'~
+- ~text = 'c'~
+- ...
+- ~text = 'z'~
+
+and then we'd shift
+- the b mask by 0 (take it as is)
+- the i mask by 1
+- the r mask by 2
+- the d mask by 3
+  
+then we and those together, get the bitmask for wherever 'bird' appears, get the ~1~ indices out of that mask and that's it.
+
+** problems with initial approach
+shifting the masks is O(n)
+boolean arrays are bit vectors in bqn so shifting them is O(n)
+
+so that's where our approach gets /even fucking funkier/
+
+* new approach
+** first of all, the data
+so... let's start with our list of words
+I grabbed the 1000 most common words in the english langauage off of [[https://raw.githubusercontent.com/powerlanguage/word-lists/refs/heads/master/1000-most-common-words.txt][github]]
+and did some preprocessing with perl&Co. to obtain the following incantation
+
+#+begin_src bash
+  # perl incantation to ensure lowercase and cointains no spaces or whatnot
+  # sort uniq to make sure our preprocessing introduced no duplicates
+
+  URL='https://raw.githubusercontent.com/powerlanguage/word-lists/refs/heads/master/1000-most-common-words.txt'
+  curl -L "${URL}" |\
+      perl -ne 'chomp; lc; print if $_ =~ /^[a-z]+$/' |\
+      sort | uniq | > wordlist
+#+end_src
+
+Another dataset we used was a list of swear words grabbed from https://www.noswearing.com/fulldict.xml, which is closer to the end goal of this project, but a bit more unorthodox and also there's some weird copyright with the file and I don't know how to contact the authors about it so... 
+it's there if you want it.
+
+The link directs to a the dictionary formatted as a list of newline separated xml documents shaped like so
+(the newlines were not added by the author, they are part of the document)
+#+begin_src xml
+  <item>
+    <title>wank</title>
+    <description>sexual act</description>
+  </item>
+  <item>
+    <title>wankjob</title>
+    <description>sexual act</description>
+  </item>
+#+end_src
+
+the swear word dictionary may be curled in with the following incantation
+#+begin_src bash
+  URL='https://www.noswearing.com/fulldict.xml'
+  # first perl incantation to get the swear word list from the xml
+  # tr removes spaces and dases from the words we got
+  # following incantations are business as usual
+
+  curl -L "${URL}" |\
+      perl -ne 'chomp; print "$1\n" if $_ =~ /^\s*<title>([a-zA-Z- ]+)</title>\s$/'|\
+      tr ' -'|\
+      perl -ne 'chomp; lc; print if $_ =~ /^[a-z]+$/' |\
+      sort | uniq | > swearlist
+
+#+end_src
+
+As far as the text goes... I wanted to use shakespeare but project guntemberg wasn't working and archive was slow, so I went with the king james bible as a txt file instead, probably not the best test data for a swear word counter... sorry :(
+
+The file can be found here: https://openbible.com/textfiles/kjv.txt
+
+** now to wrangle this data
+#+begin_quote
+*NOTE:* this explaination is mostly meant for the author trying to make sense of what he's about to do, and it may serve as a future referesher, it's unlikely to work as an explaination to start from.
+#+end_quote
+
+Our approach will be divided into 3 nested-ish sections
+
+1. *global setup:* read in and process the word list that we're gonna check against all files
+2. *file setup:* read in the file (the kjv in this case) and compute the masks which we're gonna use to check the word list against the file
+   this second step depends on step 1
+3. *for each word:* slam those masks together and voila
+
+*** global setup
+Let's grab our wordlist
+#+begin_src bqn
+  ls←•Flines "wordlist" # ls: lines
+#+end_src
+
+For this approach we want all the [letter:letter position] combos that appear in this word list, this can be easily achived by doing like
+#+begin_src bqn
+  llps ← ⍷ ∾ (⊢⋈¨↕∘≠) ls # llps: letter:letter positions set
+#+end_src
+
+We do this because shifting masks is O(n), so if we have ~bird~ and ~fish~, that "i at index 1" mask is the same for both words, so why compute it twice?
+every time we process a file we're gonna compute upfront one mask for every element of ~llps~.
+
+Wow to do some preprocessing on ~ls~ itself
+#+begin_quote
+*NOTE:* credit do [[https://discord.com/channels/821509511977762827/821511464090992640/1568632205599834164][dzaima]] for this incantation
+#+end_quote
+say we have the following list ~ls ← "bride"‿"bird"‿"hello"‿"hellos"~
+we said we're interested in letter-position pairs, so let's turn this from a list of character arrays to a list of character-position pair arrays
+
+#+begin_src bqn
+  ls ← "bride"‿"bird"‿"hello"‿"hellos"
+
+  (⊢⋈¨↕∘≠)¨ ls
+  # all the words zipped with their ↕≠ 
+  # ⟨"bride"⋈¨⟨0,1,2,3,4⟩ ⋄ "bird"⋈¨⟨0,1,2,3⟩ ⋄ .... ⟩
+  # which then becomes
+  # ⟨ ⟨⟨'b', 0⟩, ⟨'r', 1⟩, ⟨'i', 2⟩, ... ⟩ ⋄ ... ⟩
+
+  # if we flatten that out a bit
+  ∾ (⊢⋈¨↕∘≠)¨ ls
+  # ⟨ ⟨'b', 0⟩, ⟨'r', 1⟩, ⟨'i', 2⟩, ..., ⟨'b', 0⟩, ⟨'i', 1⟩, ... ⟩
+  # all in the same level
+  # now, you may (probably not) recall from the bqn docs for self search functions
+  # (https://mlochbaum.github.io/BQN/doc/selfcmp.html#classify-and-deduplicate)
+  # that 𝕩 ≡ (⊐𝕩) ⊏ (⍷𝕩)
+  # that is, we can "compress" an array as
+  # - its elements
+  # - where they appear
+  # if we do this compression here (we already have llps ← ⍷ ∾ (⊢⋈¨↕∘≠) ls) we get
+
+  ⊐ ∾ (⊢⋈¨↕∘≠)¨ ls
+  # ⟨ 0, 1, 2 , ..., 0, 5, ... ⟩
+
+  # we do this to basically skip needing a hash map in our "hot loop"
+  # if instead of a word being a list of [char-position],
+  # we make it a list of *indices* to [char-positions]
+  # we can have a big fucken flat array of masks, and use our char-position
+  # indices to grab the mask for b at 0, the mask for i at 1, and so on
+
+  # so to turn our words into those char-position indices we do
+  llis ← ⊐⌾∾ (⊢⋈¨↕∘≠)¨ ls # lines as llps indices
+
+  # that ⌾ is to undo the flattening afterwards because we want to keep the
+  # words separate, but still have the indices be global to the whole wordlist
+  # in a way that lets us index into llps
+#+end_src
+
+And, as a final optimization, we saw above the ~big text = char~ masks, but we may ignore some characters, if our wordlist contains no ~y~, for instance, why compute ~big text = 'y'~ ? that's a useless ~O(n)~ right there.
+so let's see which letters do we even have in ~ls~ 
+#+begin_src bqn
+  uls ← ∨⍷∾ls # uls: unique letters (that appear in the wordlist), also let's sort it because why not
+#+end_src
+
+*** File setup
+Ok, we prepared our global data, time to prepare our file data,
+one note before we read the file in, I'm doing this search case insensitively so I'm gonna downcase the whole array as I read it.
+
+I have these 4 case handling functions I keep copypasting around so this is what I'm gonna use for downcasing
+#+begin_src bqn
+  LCP ← 'a'⊸≤∧'z'⊸≥ # lowercase? (p is for predicate)
+  UCP ← 'A'⊸≤∧'Z'⊸≥ # uppercase?
+  DC  ← (⊢+32×UCP)  # downcase
+  UC  ← (⊢-32×LCP)  # upcase
+#+end_src
+
+now let's grab (and downcase) our file, shall we?
+#+begin_src bqn
+  fc ← DC •FBytes "data/kjv.txt" # fc: file contents
+#+end_src
+
+*** A note about character encodings
+For the project I'm doing this code for all the words we're looking for are representable as ascii,
+and we're only gonna bother with ascii or utf-8 encoded plaintext anyhow for the search, this is of interest since, quoting from the [[https://www.rfc-editor.org/info/rfc3629/#section-1][rfc]] for utf-8.
+#+begin_quote
+US-ASCII characters are encoded in one octet having the normal US-ASCII value,
+and any octet with such a value can only stand for a US-ASCII character,
+and nothing else.
+#+end_quote
+
+This means that in a utf-8 encoded stream of text, the bytes in the 0 - 127 range can only appear when they represent ascii characters;
+
+Another way to phrase it is that if the tex we're looking through
+- is valid utf-8
+- contains a sequence of bytes that says "hello" in ascii
+then it contains a sequence of bytes that says "hello" in valid utf-8.
+
+This ascii flavoured rawdogging is also the reason why we downcased the file like that, and the reason why we read it using ~•FBytes~ instead of ~•FChars~.
+Also, since we our file contents will be all lowercase "ascii", we can check for wether something is a letter just by checking wether it belongs to the range 'a'...'z'.
+
+
+our approach may not be valid for all of utf-8, but it's valid for all of the utf-8 that we're gonna bother reading.
+
+Plus being able to treat everything as ascii (ie: bytes) will make it quite a bit faster since smaller datum more crammable, more crammable better memory throughput, memory throughput always the bottleneck, grug happy.
+
+*** File masks 
+Let's now compute a mask into file for every element of ~llps~, but first, +let me take a selfie+ let's compute ~text = char~ upfront for all characters we're gonna need.
+#+begin_src bqn
+  lca  ← (⊣+↕∘¬˜)´"az"                      # lca: lower case alphabet
+  fcms ← {𝕊c: c∊uls ? fc = c ; 𝕊c: @}¨ lca  # fcms: file char masks 
+#+end_src
+
+this allows us to compute this absolute monstrosity
+#+begin_src bqn
+  flms ← {𝕊c‿i: ci←c-'a' ⋄ i«ci⊑fcms }¨ llps # flms: file llps masks 
+#+end_src
+And recall that ~llis~ is "written in ~llps~ index space", and since ~flms~ has the same ordering as ~llps~ (being that it's ~SomeShit¨llps~), then ~flms~ shares "index space" with ~llps~, and ~llis~ can index into ~flms~ just like it can index into ~llps~.
+
+*** Grand finale
+this means that instead of having to shift masks around, for every word we can compute word indices as
+#+begin_src bqn
+  w ← 2⊑llis     # could be any index of llis, using 2 as an example
+
+  wi ← /∧´w⊑flms # this is gonna work because elements of llis can index into flms
+                 # and it's gonna be the indices at which word 2 of our original
+                 # word list appear in fc
+                 # fucking unreal
+#+end_src
