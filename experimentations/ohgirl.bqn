@@ -18,31 +18,26 @@ uls ← ∧⍷∾ls             # uls: unique letters (that appear in the wordli
 # sanity check
 # ! ls ≡ ⊑⚇1 ⊏⟜llps¨ llis
 
-fc   ← DC •FBytes "data/kjv.txt"           # fc: file contents
-fcl  ← ≠fc                                     # fcl: file contents length
-fcms ← {𝕊c: ⊑c∊uls ? fc = c ; 𝕊c: @}¨ lca      # fcms: file char masks 
-flms ← {𝕊c‿i: ci←c-'a' ⋄ (i⥊0)«ci⊑fcms }¨ llps # flms: file llps masks 
+WCS ← {
+    fc   ← DC •FBytes 𝕩                            # fc: file contents
+    fcl  ← ≠fc                                     # fcl: file contents length
+    fcms ← {𝕊c: ⊑c∊uls ? fc = c ; 𝕊c: @}¨ lca      # fcms: file char masks 
+    flms ← {𝕊c‿i: ci←c-'a' ⋄ (i⥊0)«ci⊑fcms }¨ llps # flms: file llps masks 
+    {
+        # wcs: word counts
+        w𝕊wlis:             # word 𝕊 word llps indices
+        wl   ← ≠w           # wl: word length
+        wfis ← /∧´wlis⊏flms # wfis: word file occurence indices
+        
+        # iwc: intenal word count
+        # (disregarding wether word appears at the start or end of fc) 
+        iwc ← +´ ¬ (LCP(0⌈wfis-1)⊏fc) ∨ (LCP(fcl⌊wfis+wl)⊏fc)
+        
+        # return iwc + (appears at start?) + (appears at end?)
+        iwc + (w≡wl↑fc) + (w≡(-wl)↑fc)
+    }´¨ ls⋈¨llis
+}
 
-# test data (to debug: comment canonical definitions and rerun with these)
-#ls←"bird"‿"bride"‿"horse"‿"horsey"‿"fly"
-#fc← "won't you fly yyyyyyy free bird"
-#w←"fly"
-#wlis←11‿12‿13
-#wlis←11‿12‿13
-
- wcs ← {                # wcs: word counts
-    w𝕊wlis:             # word 𝕊 word llps indices
-    wl   ← ≠w           # wl: word length
-    wfis ← /∧´wlis⊏flms # wfis: word file occurence indices
-
-    # iwc: intenal word count
-    # (disregarding wether word appears at the start or end of fc) 
-    iwc ← +´ ¬ (LCP(0⌈wfis-1)⊏fc) ∨ (LCP(fcl⌊wfis+wl)⊏fc)
-
-    # return iwc + (appears at start?) + (appears at end?)
-    #iwc + (w≡wl↑fc) + (w≡(-wl)↑fc)
-    iwc
-}´¨ ls⋈¨llis
-
-{𝕊l‿c: •Out l∾": "∾•Repr c}¨ ls⋈¨wcs 
+WCS "data/kjv.txt"
+#{𝕊l‿c: •Out l∾": "∾•Repr c}¨ ls⋈¨ WCS "data/kjv.txt"
 
