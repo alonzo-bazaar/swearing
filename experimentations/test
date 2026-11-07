@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -x
+./ohboi.pl wordlist  > pl
+./stripped.bqn wordlist > bq
+diff pl bq
+rm pl bq

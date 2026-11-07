@@ -11,8 +11,12 @@ kjv ← DC •Fbytes "data/kjv.txt"
 # kjv=i for i in range(a..z)
 # and then we shift and ∧ those together when looking for matches
 
+# not the best bibliography but for the "Ai8" thing see dzaima's message here
+# https://discord.com/channels/821509511977762827/821511464090992640/1568393257971617904
+
 lca ← (⊣+↕∘¬˜)´"az" # lower case alphabet
-aleq ← lca =⌜ kjv   # alphabet equals (kjv)
+#aleq ← "Ai8"⊸•internal.Variation lca =⌜ kjv   # alphabet equals (kjv)
+aleq ← <˘ lca =⌜ kjv   # alphabet equals (kjv)
 
 # say we wanna do a match like kjv =~ /\bbird\b/gi 
 # we wanna know how often 'bird' appears in the kjv, ignoring case, surrounded
@@ -20,7 +24,7 @@ aleq ← lca =⌜ kjv   # alphabet equals (kjv)
 WordFreq ← { 𝕊w:
     # w←'bird', arrs ←[b←kjv='b', i←kjv='i', r←kjv='r', r←kjv='d']
     # (due to how we defined aleq)
-    arrs ← <˘ aleq ⊏˜ w-'a'
+    arrs ← aleq ⊏˜ w-'a'
 
     # to get the indices at which 'bird' appears we want to and together
     # b, 1↓i, 2↓r, 3↓d
@@ -64,4 +68,4 @@ WordFreq ← { 𝕊w:
 # rg -i --count-matches '\bbird\b' data/kjv.txt 
 O ← {𝕊𝕩: •Out 𝕩 ∾ ": " ∾ •Repr WordFreq 𝕩}
 
-•Show +´ WordFreq¨ •Flines "wordlist"
+O¨ •Flines ⊑ •args

@@ -20,7 +20,7 @@ while(<>) {
                     '--count-matches',
                     'data/kjv.txt');
     $count or $count = 0;
-    #print "$word: $count\n";
-    $total+=$count;
+    print "$word: $count\n";
+    #$total+=$count;
 }
-print "$total\n";
+#print "$total\n";
