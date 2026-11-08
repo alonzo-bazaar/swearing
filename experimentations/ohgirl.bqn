@@ -38,6 +38,5 @@ WCS ← {
     }´¨ ls⋈¨llis
 }
 
-WCS "data/kjv.txt"
-#{𝕊l‿c: •Out l∾": "∾•Repr c}¨ ls⋈¨ WCS "data/kjv.txt"
+{𝕊l‿c: •Out l∾": "∾•Repr c}¨ ls⋈¨ WCS "data/kjv.txt"
 
