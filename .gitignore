@@ -13,4 +13,11 @@ experimentations/data/*
 # idem avec pommes de terre for json
 *.json
 
+# executables and build artefacts
+*.o
+*.so
+*.out
 
+# for the sicurezz
+*.jar
+*.class

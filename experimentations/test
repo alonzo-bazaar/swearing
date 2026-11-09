@@ -1,8 +1,84 @@
 #!/usr/bin/env bash
-[[ -v DEBUG ]] && set -x
 
-BASELINE='./ohboi.pl'
-UNDER_TEST='./ohgirl.bqn'
+# Test the output of our homebrewed bqn searching algorithm against a baseline
+# (the baseline is ripgrep)
+
+# NOTE:
+# When called with a file, like say
+# $ rg -i 'hello' file.txt -g '*.c'
+# rg will process the file.txt even if it does *not match* the glob -g '*.c'
+#
+# If you call find the same way, by doing
+# $ find file.txt -type f -name '*.c'
+# then find's output will *not contain* file.txt, 'cause it doesn't match.
+# 
+# This isn't about passing files, both of these calls *will* return file.txt
+# $ find file.txt -type f -name '*.txt'
+# $ find file.txt -type f
+#
+# Although we're gonan use globbing for searching files in directories, and not
+# pass files directly to find/rg, this difference in behaviour is a quirk to keep
+# in mind for testing, where we *do* pass files directly to find/rg
+
+[[ -v DEBUG ]] && set -x
+SCRIPT_DIR="$(dirname "$0")"
+[[ -v TEST ]] || TEST=unicode
+# recognized values for TEST are
+# kjv      = large ascii file (the entire king james bible)
+# unicode  = file containing non-ascii unicode characters (still utf8)
+# 
+# adv-file = file I'll try to cook explicitly to make our version fail
+# adv-dir  = directory I'll try to cook explicitly to make our version fail
+# 
+# httpd    = git repository for apache httpd, cloned off of github
+# linux    = git repository for the linux kernel, cloned off of github
+
+fatal() {
+    echo "[FATAL ERROR]: $*" >&2;
+    exit 1;
+}
+
+cd "${SCRIPT_DIR}" || fatal "could not cd into script dir ${SCRIPT_DIR}"
+
+baseline() {
+    # recall this is not a closure, and that bash sucks ass
+    call-baseline() {
+        if [[ -n "$2" ]]; then
+            ./ohboi.pl wordlist "data/$1" "$2"
+        else
+            ./ohboi.pl wordlist "data/$1"
+        fi
+    }
+
+    case "${TEST}" in
+        kjv)      call-baseline kjv.txt               ;;
+        unicode)  call-baseline file-with-unicode.txt ;;
+        adv-file) call-baseline adversarial.txt       ;;
+        adv-dir)  call-baseline adversarial/          ;;
+        httpd)    call-baseline httpd/ '*.[ch]'       ;;
+        linux)    call-baseline linux/ '*.[ch]'       ;;
+    esac
+}
+
+under-test() {
+    # we do no globbing in the bqn script, that's better left off to find
+    call-under-test() {
+        if [[ -n "$2" ]]; then
+            find "data/$1" -type f -name "$2" -print0 | ./ohdzaima.bqn
+        else
+            find "data/$1" -type f -print0 | ./ohdzaima.bqn
+        fi
+    }
+
+    case "${TEST}" in
+        kjv)      call-under-test kjv.txt               ;;
+        unicode)  call-under-test file-with-unicode.txt ;;
+        adv-file) call-under-test adversarial.txt       ;;
+        adv-dir)  call-under-test adversarial/          ;;
+        httpd)    call-under-test httpd/ '*.[ch]'       ;;
+        linux)    call-under-test linux/ '*.[ch]'       ;;
+    esac
+}
 
 cleanup() {
     [[ -f bl_out ]] && rm bl_out
@@ -10,9 +86,9 @@ cleanup() {
 }
 
 run-test() {
-    "${BASELINE}"   wordlist > bl_out
-    "${UNDER_TEST}" wordlist > ut_out
-    diff bl_out ut_out
+    baseline   > bl_out
+    under-test > ut_out
+    diff bl_out ut_out || echo "test failed :("
 }
 
 main() {
@@ -23,8 +99,8 @@ main() {
     # do the damn thing
     run-test
 
-    # clean up after yourself, you filthy animal
-    cleanup
+    # I'm commenting this out so I can better inspect the output in case it fails
+    # cleanup
 }
 
 main "$@"
