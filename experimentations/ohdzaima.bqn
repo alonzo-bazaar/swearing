@@ -7,9 +7,9 @@
 # 
 # function written by dzaima, I just changed the indentation
 #⟨wbm⇐mask⟩←•Import "bigfucking.bqn" # wbm: word boundary mask
+
 libiuc_version ← 77
 ia ← "/usr/lib64/libicuuc.so" •FFI "u8"‿("u_isUAlphabetic" ∾ "_" ∾ •Repr libiuc_version)‿">u32"
-
 getdelim ← {
     stdin ← @ •foreign.Value "*"‿"stdin"
     gd0 ← @ •FFI "isize"‿"getdelim"‿"&*i8:c8"‿"&usize"‿"i32"‿"*"
@@ -79,11 +79,18 @@ WCS ← {𝕊fc:
     }´¨ ls⋈¨llis
 }
 
-wc ← 0⥊˜≠ls
-# this is the loop that reads from the `find -print0` upstream from this script
-{𝕊: @≢l←GetDelim@ ? wc ↩ wc + (WCS •FromUTF8 DC •FBytes l) ⋄ 1 ;
- 𝕊: 0
-}•_while_⊢ 1
-
-# print out accumulated value (this one's for testing)
-{𝕊l‿c: •Out l∾": "∾•Repr c}¨ ls⋈¨wc
+{𝕊 0: 𝕊 1
+ ;
+ 𝕊 1:
+    wc ← 0⥊˜≠ls
+    # this loop reads from the `find -print0` upstream from this script
+    {𝕊: @≢l←GetDelim@ ? wc ↩ wc + (WCS DC •FChars l) ⋄ 1 ;
+     𝕊: 0
+    }•_while_⊢ 1
+    # print out accumulated value (this one's for testing)
+    {𝕊l‿c: •Out l∾": "∾•Repr c}¨ ls⋈¨wc
+ ;
+ 𝕊 2: {𝕊l‿c: •Out l∾": "∾•Repr c}¨ ls⋈¨WCS DC •FChars 1⊑•args 
+ ;
+ 𝕊: •Out "incorrect number of arguments! go fuck yourself"
+}≠•args

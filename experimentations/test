@@ -3,81 +3,72 @@
 # Test the output of our homebrewed bqn searching algorithm against a baseline
 # (the baseline is ripgrep)
 
-# NOTE:
-# When called with a file, like say
-# $ rg -i 'hello' file.txt -g '*.c'
-# rg will process the file.txt even if it does *not match* the glob -g '*.c'
-#
-# If you call find the same way, by doing
-# $ find file.txt -type f -name '*.c'
-# then find's output will *not contain* file.txt, 'cause it doesn't match.
-# 
-# This isn't about passing files, both of these calls *will* return file.txt
-# $ find file.txt -type f -name '*.txt'
-# $ find file.txt -type f
-#
-# Although we're gonan use globbing for searching files in directories, and not
-# pass files directly to find/rg, this difference in behaviour is a quirk to keep
-# in mind for testing, where we *do* pass files directly to find/rg
-
 [[ -v DEBUG ]] && set -x
-SCRIPT_DIR="$(dirname "$0")"
-[[ -v TEST ]] || TEST=unicode
-# recognized values for TEST are
-# kjv      = large ascii file (the entire king james bible)
-# unicode  = file containing non-ascii unicode characters (still utf8)
-# 
-# adv-file = file I'll try to cook explicitly to make our version fail
-# adv-dir  = directory I'll try to cook explicitly to make our version fail
-# 
-# httpd    = git repository for apache httpd, cloned off of github
-# linux    = git repository for the linux kernel, cloned off of github
 
 fatal() {
     echo "[FATAL ERROR]: $*" >&2;
     exit 1;
 }
 
-cd "${SCRIPT_DIR}" || fatal "could not cd into script dir ${SCRIPT_DIR}"
+SCRIPT_DIR="$(dirname "$0")"
+WORDLIST_FILE="${SCRIPT_DIR}/wordlist"
+
+[[ -v TEST ]] || TEST=httpd
+TEST_HAYSTACK=
+TEST_PATTERN=
+
+POSSIBLE_TESTS=( kjv unicode adv-file adv-dir httpd linux )
+case "${TEST}" in
+    kjv)      TEST_HAYSTACK="${SCRIPT_DIR}/data/kjv.txt"
+              TEST_PATTERN=
+              ;;
+    unicode)  TEST_HAYSTACK="${SCRIPT_DIR}/data/file-with-unicode.txt"
+              TEST_PATTERN=
+              ;;
+    adv-file) TEST_HAYSTACK="${SCRIPT_DIR}/data/adversarial.txt"
+              TEST_PATTERN=
+              ;;
+    adv-dir)  TEST_HAYSTACK="${SCRIPT_DIR}/data/adversarial/"
+              TEST_PATTERN=
+              ;;
+    httpd)    TEST_HAYSTACK="${SCRIPT_DIR}/data/httpd/"
+              TEST_PATTERN='*.[ch]'
+              ;;
+    linux)    TEST_HAYSTACK="${SCRIPT_DIR}/data/linux/"
+              TEST_PATTERN='*.[ch]'
+              ;;
+esac
+cd "${SCRIPT_DIR}" || fatal "could not cd into script dir ${SCRIPT_DIR}!"
 
 baseline() {
-    # recall this is not a closure, and that bash sucks ass
-    call-baseline() {
-        if [[ -n "$2" ]]; then
-            ./ohboi.pl wordlist "data/$1" "$2"
-        else
-            ./ohboi.pl wordlist "data/$1"
-        fi
-    }
-
-    case "${TEST}" in
-        kjv)      call-baseline kjv.txt               ;;
-        unicode)  call-baseline file-with-unicode.txt ;;
-        adv-file) call-baseline adversarial.txt       ;;
-        adv-dir)  call-baseline adversarial/          ;;
-        httpd)    call-baseline httpd/ '*.[ch]'       ;;
-        linux)    call-baseline linux/ '*.[ch]'       ;;
-    esac
+    if [[ -n "${TEST_PATTERN}" ]]; then
+        ./ohboi.pl "${WORDLIST_FILE}" "${TEST_HAYSTACK}" "${TEST_PATTERN}"
+    else
+        ./ohboi.pl "${WORDLIST_FILE}" "${TEST_HAYSTACK}"
+    fi
 }
 
 under-test() {
-    # we do no globbing in the bqn script, that's better left off to find
-    call-under-test() {
-        if [[ -n "$2" ]]; then
-            find "data/$1" -type f -name "$2" -print0 | ./ohdzaima.bqn
-        else
-            find "data/$1" -type f -print0 | ./ohdzaima.bqn
-        fi
-    }
+    if [[ -n "${TEST_PATTERN}" ]]; then
+        ./rast/target/release/rast "${WORDLIST_FILE}" "${TEST_HAYSTACK}" "${TEST_PATTERN}"
+    else
+        ./rast/target/release/rast "${WORDLIST_FILE}" "${TEST_HAYSTACK}"
+    fi
+}
 
-    case "${TEST}" in
-        kjv)      call-under-test kjv.txt               ;;
-        unicode)  call-under-test file-with-unicode.txt ;;
-        adv-file) call-under-test adversarial.txt       ;;
-        adv-dir)  call-under-test adversarial/          ;;
-        httpd)    call-under-test httpd/ '*.[ch]'       ;;
-        linux)    call-under-test linux/ '*.[ch]'       ;;
-    esac
+old--under-test() {
+    # we do no globbing in the bqn script, that's better left off to find
+    if [[ -f "${TEST_HAYSTACK}" ]]; then
+        ./ohdzaima.bqn "${WORDLIST_FILE}" "${TEST_HAYSTACK}"
+    else
+        if [[ -n "${TEST_PATTERN}" ]]; then
+            find "${TEST_HAYSTACK}" -type f -name "${TEST_PATTERN}" -print0 |\
+                ./ohdzaima.bqn "${WORDLIST_FILE}"
+        else
+            find "${TEST_HAYSTACK}" -type f -print0 |\
+                ./ohdzaima.bqn "${WORDLIST_FILE}"
+        fi
+    fi
 }
 
 cleanup() {
