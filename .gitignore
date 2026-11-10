@@ -10,6 +10,8 @@ experimentations/data/*
 experimentations/*_out
 experimentations/output/*
 
+experimentations/rast/target/*
+
 # given that I'm working with some big fucking csv files, ignore all csv files
 *.csv
 # idem avec pommes de terre for json

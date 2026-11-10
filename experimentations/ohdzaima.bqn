@@ -6,7 +6,9 @@
 # (file names may contain newlines)
 # 
 # function written by dzaima, I just changed the indentation
-⟨wbm⇐mask⟩←•Import "bigfucking.bqn" # wbm: word boundary mask
+#⟨wbm⇐mask⟩←•Import "bigfucking.bqn" # wbm: word boundary mask
+libiuc_version ← 77
+ia ← "/usr/lib64/libicuuc.so" •FFI "u8"‿("u_isUAlphabetic" ∾ "_" ∾ •Repr libiuc_version)‿">u32"
 
 getdelim ← {
     stdin ← @ •foreign.Value "*"‿"stdin"
@@ -57,18 +59,20 @@ WCS ← {𝕊fc:
     # fcl: file contents length
     fcl  ← ≠fc
     # fcms: file char masks 
-    fcms ← {𝕊c: ⊑c∊uls ? fc = c ; 𝕊c: @}¨ lca
+    fcms ← fc⊸=¨ lca
     # flms: file llps masks 
-    flms ← {𝕊c‿i: ci←c-'a' ⋄ (i⥊0)«ci⊑fcms }¨ llps
+    flms ← {𝕊c‿i: (i⥊0)«(c-'a')⊑fcms }¨ llps
 
     {w𝕊wlis:                # word 𝕊 word llps indices
-        wl   ← ≠w           # wl: word length
-        wfis ← /∧´wlis⊏flms # wfis: word file occurence indices
-        
-        # iwc: intenal word count
-        # ie: word count, but disregarding the two cases where the
-        # word appears at the very start or at the very end of fc
-        iwc ← +´ ¬ (wbm⊏˜@-˜(0⌈wfis-1)⊏fc) ∨ (wbm⊏˜@-˜(fcl⌊wfis+wl)⊏fc)
+        wl   ← ≠w               # wl: word length
+        # wfom ← ∧´wlis⊏flms      # wfom: word file occurence mask
+        # ws   ← («wfom)/fc       # word starts
+        # we   ← ((wl⥊0)»wfom)/fc # word ends
+        # iwc  ← +´ (wbm⊏˜@-ws) ∧ (wbm⊏˜@-ws)
+
+        wfis ← /∧´wlis⊏flms       # wfis: word file occurence indices
+        iwc  ← +´ ¬ (IA¨@-˜(0⌈wfis-1)⊏fc) ∨ (IA¨@-˜(fcl⌊wfis+wl)⊏fc)
+        #iwc ← +´ ¬ (wbm⊏˜@-˜(0⌈wfis-1)⊏fc) ∨ (wbm⊏˜@-˜(fcl⌊wfis+wl)⊏fc)
         
         # return iwc + (appears at start?) + (appears at end?)
         iwc + (w≡wl↑fc) + (w≡(-wl)↑fc)
